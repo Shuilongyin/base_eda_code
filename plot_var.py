@@ -60,23 +60,25 @@ class Plot_vars():
                         nodiscol_tmp.append(i)
             if len(nodiscol_tmp)>0:
                 self.nodiscol = nodiscol_tmp
-    def cut_points_bring(self,col_order,col,disnums):
+    def cut_points_bring(self,col_order,col):
         '''
         col_order:DataFrame,非null的数据集，包含y，按变量值顺序排列；
         col:str.变量名；
         disnums：离散的组数；disnums每找到一个分割点，就减1
         '''
         PCount = len(col_order.index)
-        if PCount/self.col_notnull_count[col]>=(1/self.disnums):#若剩下的数据满足分组条件，即剩下的数据的占比不小于xx比例，则继续分
+        min_group_num = self.col_notnull_count[col]/self.disnums
+        disnums = int(PCount/min_group_num)  #重新根据剩下的数据确定分割组数
+        if PCount/self.col_notnull_count[col]>=(1/self.disnums) and disnums>0:#若剩下的数据满足分组条件，即剩下的数据的占比不小于xx比例，则继续分
             n_cut = int(PCount/disnums) #找到分割点
             cut_point = col_order[col].iloc[n_cut-1] #分割点的数值
-            for i in col_order[col].iloc[n_cut:]: #看这个数值在这个点是否唯一，若不唯一，往前推
+            for i in col_order[col].iloc[n_cut:]: #看这个数值在这个点是否唯一，若不唯一，往后推
                 if i==cut_point:
                     n_cut+=1
                 else:
                     self.col_cut_points[col].append(cut_point)
                     break
-            self.cut_points_bring(col_order[n_cut:],col,disnums-1) #递归，在剩下的数据集中再分割
+            self.cut_points_bring(col_order[n_cut:],col) #递归，在剩下的数据集中再分割
         
     def dis_group(self,col):
         '''
@@ -84,7 +86,7 @@ class Plot_vars():
         '''
         dis_col_data_notnull = self.mydat.loc[pd.notnull(self.mydat[col]),[self.dep,col]] #取出非null数据，包括y        
         Order_P=dis_col_data_notnull.sort_values(by=[col],ascending=True)#排序
-        self.cut_points_bring(Order_P,col,self.disnums) #取得分割点
+        self.cut_points_bring(Order_P,col) #取得分割点
         dis_col_cuts=[]
         dis_col_cuts.append(dis_col_data_notnull[col].min())
         dis_col_cuts.extend(self.col_cut_points[col])
@@ -122,7 +124,7 @@ class Plot_vars():
         col:str,变量名称
         '''
         nodis_col_data = self.mydat.loc[:,[self.dep,col]] #取该变量的数据，包括null值
-        is_na = np.nan in list(nodis_col_data[col]) #判断是否有null值
+        is_na = (pd.isnull(nodis_col_data[col]).sum()>0) #判断是否有null值
         col_group = nodis_col_data.groupby([col],as_index=False)['y'].agg({'count':'count','bad_num':'sum'})
         col_group = pd.DataFrame(col_group,columns=[col,'bad_num','count'])    
         if is_na:#判断是否有null值，若有，则单独计算，因null值不存在上面的col_group中
@@ -135,7 +137,7 @@ class Plot_vars():
         col_group['risk_times'] = col_group['bad_per']/avg_risk
         if is_na: #判断是否有null值，增加一列bins
             bins = col_group[col][:len(col_group.index)-1]
-            bins[len(col_group.index)]='nan'
+            bins[len(bins.index)]='nan'
             col_group['bins'] = bins
             col_labels = list(range(len(col_group.index)-1))
             col_labels.append(-1)

@@ -8,6 +8,7 @@ from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from  math import log
 
 class Model_evaluation():
     '''
@@ -206,9 +207,41 @@ class Apply_benchmark():
         'group_per','lower_point','upper_point'])
         return data,group_df
 
-
-
-
+class Calc_psi():
+    '''
+    var_psi:计算单变量的psi（包括模型分组）;
+    vars_psi:计算多个变量的psi;
+    '''
+    def __init__(self, data_actual=None, data_expect=None):
+        '''
+        data_actual: DataFrame, 实际占比，即外推样本分组后的变量；
+        data_expect: DataFrame, 预期占比， 即建模样本分组后的变量；
+        '''
+        self.data_actual = data_actual
+        self.data_expect = data_expect
+    def var_psi(self, series_actual, series_expect):
+        '''
+        series_actual: Series, 实际样本分组后的变量(或样本分组)；
+        series_expect: Series, 预期样本分组后的变量（或样本分组）；
+        psi计算：sum(（实际占比-预期占比）* ln(实际占比/预期占比)); 一般认为psi小于0.1时候模型稳定性很高，0.1-0.25一般，大于0.25模型稳定性差
+        '''
+        series_actual_counts = pd.DataFrame(series_actual.value_counts(sort=False, normalize=True))
+        series_actual_counts.columns=['per_1']
+        series_expect_counts = pd.DataFrame(series_expect.value_counts(sort=False, normalize=True))
+        series_expect_counts.columns=['per_2']
+        series_counts = series_actual_counts.merge(series_expect_counts,how='right',left_index=True,right_index=True)
+        series_counts['per_diff'] = series_counts['per_1']-series_counts['per_2']
+        series_counts['per_ln_ratio'] = (series_counts['per_1']/series_counts['per_2']).apply(lambda x:log(x))
+        psi = (series_counts['per_diff']*series_counts['per_ln_ratio']).sum()
+        return psi
+    def vars_psi(self):
+        col_psi_dict = {}
+        for col in self.data_expect.columns:
+            psi = self.var_psi(self.data_actual[col], self.data_expect[col])
+            col_psi_dict[col] = psi
+        return pd.Series(col_psi_dict)
+        
+    
 
 
 

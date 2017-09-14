@@ -30,7 +30,7 @@ def entropy(data_classes, base=2):
 
     return ent
 
-def cut_point_information_gain(dataset, cut_point, feature_label, class_label):
+def cut_point_information_gain(dataset, cut_point, feature_label, class_label='y'):
     '''
     Return de information gain obtained by splitting a numeric attribute in two according to cut_point
     :param dataset: pandas dataframe with a column for attribute values and a column for class

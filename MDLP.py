@@ -39,8 +39,6 @@ class MDLP_Discretizer(object):
         self._notDiscretizer = []
         
         
-
-
         #if user specifies which attributes to discretize
         if features:
             self._features = [f for f in features if f in self._data_raw.columns]  # check if features in dataframe
@@ -94,7 +92,7 @@ class MDLP_Discretizer(object):
         k_right = len(data_right[self._class_name].unique())
         entropy_left = entropy(data_left[self._class_name])  # entropy of partition
         entropy_right = entropy(data_right[self._class_name])
-        delta = log(3 ** k, 2) - (k * partition_entropy) + (k_left * entropy_left) + (k_right * entropy_right)
+        delta = log(3 ** k-2, 2) - (k * partition_entropy) + (k_left * entropy_left) + (k_right * entropy_right)
 
         #to split or not to split
         gain_threshold = ((log(N - 1, 2) + delta) / N)*per #此per为那些不达标准但仍需要离散的变量准备
