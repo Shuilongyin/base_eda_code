@@ -135,7 +135,7 @@ class Woe_iv():
         #生成一个左开右闭的字符串范围
         dis_col_bins.extend( ['(%s,%s]'%(dis_col_cuts[i],dis_col_cuts[i+1]) for i in range(len(dis_col_cuts)-1)])
         dis_col = dis_col_data.fillna(-1) #将nan值赋值为-1
-        col_group = dis_col.groupby([col],as_index=False)['y'].agg({'count':'count','bad_num':'sum'})
+        col_group = dis_col.groupby([col],as_index=False)[self.dep].agg({'count':'count','bad_num':'sum'})
         col_group['good_num'] = col_group['count']-col_group['bad_num']
         col_group['per'] = col_group['count']/col_group['count'].sum()
         if -1 in list(col_group[col]):#判断是否有缺失值，关系到列的长度
@@ -157,7 +157,7 @@ class Woe_iv():
         '''
         nodis_col_data = self.mydat.loc[:,[self.dep,col]] #取该变量的数据，包括null值
         is_na = (pd.isnull(nodis_col_data[col]).sum()>0) #判断是否有null值
-        col_group = nodis_col_data.groupby([col],as_index=False)['y'].agg({'count':'count','bad_num':'sum'})
+        col_group = nodis_col_data.groupby([col],as_index=False)[self.dep].agg({'count':'count','bad_num':'sum'})
         col_group = pd.DataFrame(col_group,columns=[col,'bad_num','count'])    
         if is_na:#判断是否有null值，若有，则单独计算，因null值不存在上面的col_group中
             y_na_count = nodis_col_data[pd.isnull(nodis_col_data[col])][self.dep].count()

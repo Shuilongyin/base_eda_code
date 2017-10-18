@@ -190,7 +190,7 @@ class Plot_vars():
         the_table.set_fontsize(5) #设置表格的字大小
         if self.file_path is not None:#判断是否需要保存
             plt.savefig(self.file_path+col+'.pdf',dpi=600)
-        plt.show
+        plt.show()
         return
     def plot_vars(self):
         if self.plotcol is not None: #若plotcol有指定，则只画指定的变量

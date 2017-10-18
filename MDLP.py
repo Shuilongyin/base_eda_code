@@ -95,7 +95,7 @@ class MDLP_Discretizer(object):
         delta = log(3 ** k-2, 2) - (k * partition_entropy) + (k_left * entropy_left) + (k_right * entropy_right)
 
         #to split or not to split
-        gain_threshold = ((log(N - 1, 2) + delta) / N)*per #此per为那些不达标准但仍需要离散的变量准备
+        #gain_threshold = ((log(N - 1, 2) + delta) / N)*per #此per为那些不达标准但仍需要离散的变量准备
 
         if cut_point_gain > gain_threshold:
             return True

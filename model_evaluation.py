@@ -43,12 +43,12 @@ class Model_evaluation():
         plt.ylim([0.0, 1.0])
         plt.ylabel('Recall')
         plt.xlabel('Fall-out')
-        plt.show()
         if self.save_file is not None and file_name is not None:
             plt.savefig(self.save_file+file_name)
         else:
-            pass        
-        return
+            pass
+        plt.show()
+        return roc_auc
     def ks_curve(self,file_name=None):
         '''
         ：file_name; file name of pic, str, 'xx.pdf'
@@ -80,12 +80,12 @@ class Model_evaluation():
         plt.plot(x_axis,pCumsumPer,color='red')
         plt.plot(x_axis,nCumsumPer,color='blue')
         plt.legend(('TPR','FPR'),loc='lower right')
-        plt.show()
         if self.save_file is not None and file_name is not None:
             plt.savefig(self.save_file+file_name)
         else:
-            pass        
-        return
+            pass 
+        plt.show()
+        return ks
     def group_risk_curve(self,n,file_name=None):
         '''
         ：n;分组的组数
@@ -124,12 +124,11 @@ class Model_evaluation():
         ax2.set_ylabel('risktimes', fontsize = 12)
         ax1.set_xlim([0, max(group_df['group'])+1]) 
         plt.title('group_risk_curve')
-        plt.show()
         if self.save_file is not None and file_name is not None:
             plt.savefig(self.save_file+file_name)
         else:
             pass 
-        
+        plt.show()
         return data,cut_points,group_df
         
 class Apply_benchmark():
@@ -183,7 +182,7 @@ class Apply_benchmark():
         : data，测算样本分组详情,pd.DataFrame
         ：group_df，测算样本分组聚合详情,pd.DataFrame
         '''
-        data = pd.DataFrame(predict_prob,columns=['prob'])
+        data = pd.DataFrame(predict_prob.values,columns=['prob'])
         data['group'] = [0 for i in data.index]
         data['lower_point'] = [0 for i in data.index]
         data['upper_point'] = [0 for i in data.index]
